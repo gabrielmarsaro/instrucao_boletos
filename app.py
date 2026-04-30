@@ -374,7 +374,7 @@ with aba3:
     else:
         dict_conv_remessa = {f"{row['razao_social']} - Ag/Cc: {row['agencia']}/{row['conta']}": row for idx, row in df_conv.iterrows()}
         conv_escolhido = st.selectbox("Selecione o Convênio:", list(dict_conv_remessa.keys()))
-              lista_instrucoes = [
+        lista_instrucoes = [
             "01 - Entrada de títulos",
             "02 - Pedido de baixa",
             "04 - Concessão de Abatimento",
