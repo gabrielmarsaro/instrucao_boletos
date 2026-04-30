@@ -374,7 +374,36 @@ with aba3:
     else:
         dict_conv_remessa = {f"{row['razao_social']} - Ag/Cc: {row['agencia']}/{row['conta']}": row for idx, row in df_conv.iterrows()}
         conv_escolhido = st.selectbox("Selecione o Convênio:", list(dict_conv_remessa.keys()))
-        instrucao = st.selectbox("Instrução da Remessa:", ["01 - Remessa de Títulos", "02 - Pedido de Baixa", "06 - Alteração de Vencimento"])
+              lista_instrucoes = [
+            "01 - Entrada de títulos",
+            "02 - Pedido de baixa",
+            "04 - Concessão de Abatimento",
+            "05 - Cancelamento de Abatimento",
+            "06 - Alteração de Vencimento",
+            "07 - Concessão de Desconto",
+            "08 - Cancelamento de Desconto",
+            "09 - Protestar",
+            "10 - Cancela/Sustação da Instrução de protesto",
+            "12 - Alterar Juros de Mora",
+            "13 - Dispensar Juros de Mora",
+            "14 - Cobrar Multa",
+            "15 - Dispensar Multa",
+            "16 - Ratificar dados da Concessão de Desconto",
+            "19 - Altera Prazo Limite de Recebimento",
+            "20 - Dispensar Prazo Limite de Recebimento",
+            "21 - Altera do Número do Título dado pelo Beneficiário",
+            "22 - Alteração do Número de Controle do Participante",
+            "23 - Alteração de Nome e Endereço do Pagador",
+            "30 - Recusa da Alegação do Sacado",
+            "31 - Alteração de Outros Dados",
+            "34 - Altera Data Para Concessão de Desconto",
+            "40 - Alteração de modalidade",
+            "45 - Inclusão de Negativação sem protesto",
+            "46 - Exclusão de Negativação sem protesto",
+            "47 - Alteração do Valor Nominal do Boleto"
+        ]
+        instrucao = st.selectbox("Instrução da Remessa:", lista_instrucoes)
+
         
         st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
         arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
