@@ -279,10 +279,16 @@ if not st.session_state.user:
 # INTERFACE PRINCIPAL (ABAS)
 # ==========================================
 st.title("Gerador de Remessa CNAB 240")
-aba1, aba2, aba3 = st.tabs(["🏦 Meus Convênios", "👥 Meus Clientes", "⚙️ Gerar Remessa"])
+
+# Reordenando as abas e nomeando as variáveis de forma explícita
+aba_remessa, aba_clientes, aba_convenios = st.tabs([
+    "⚙️ Gerar Remessa", 
+    "👥 Meus Clientes", 
+    "🏦 Meus Convênios"
+])
 
 # ---- ABA 1: MEUS CONVÊNIOS ----
-with aba1:
+with Meus Convênios:
     st.header("Gestão de Convênios Bancários")
     
     with st.expander("Cadastrar Novo Convênio"):
@@ -331,7 +337,7 @@ with aba1:
         st.info("Nenhum convênio cadastrado.")
 
 # ---- ABA 2: MEUS CLIENTES ----
-with aba2:
+with Meus Clientes:
     st.header("Base de Sacados (Clientes)")
     
     col_cad, col_imp = st.columns(2)
@@ -401,7 +407,7 @@ with aba2:
 if 'lotes' not in st.session_state:
     st.session_state.lotes = []
 
-with aba3:
+with Gerar Remessa:
     st.header("Processamento de Remessa")
     
     if df_conv.empty:
