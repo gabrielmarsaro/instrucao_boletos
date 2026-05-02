@@ -598,6 +598,19 @@ with aba_remessa:
                         linhas_arquivo.append(gerar_segmento_q(dados_cliente_db, index_lote, seq_registro_lote, inst))
                         seq_registro_lote += 1
                         qtd_registros_lote += 1
+
+                    # Resgata dados do Segmento R salvos no lote
+                        perc_multa = lote.get('multa', 0)
+                        msg_r = lote.get('mensagem', "")
+                        
+                        # Sempre geraremos o R se houver multa ou mensagem[cite: 1]
+                        if perc_multa > 0 or msg_r != "":
+                            # Usamos o vencimento do boleto como data base da multa
+                            dt_venc = pd.to_datetime(row_boleto['vencimento líquido'])
+                            
+                            linhas_arquivo.append(gerar_segmento_r(index_lote, seq_registro_lote, inst, perc_multa, dt_venc, msg_r))
+                            seq_registro_lote += 1
+                            qtd_registros_lote += 1
                     
                     registros_total_lote_formatado = qtd_registros_lote + 2
                     linhas_arquivo.append(gerar_trailer_lote(index_lote, registros_total_lote_formatado))
