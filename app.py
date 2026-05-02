@@ -8,7 +8,11 @@ import io
 # ==========================================
 # CONFIGURAÇÃO DE PÁGINA E SUPABASE
 # ==========================================
-st.set_page_config(page_title="Gerador CNAB 240", page_icon="🏦", layout="wide")
+st.set_page_config(
+    page_title="Kóre Cash | Hub de Recebíveis",
+    page_icon="logo_kore.png", # Puxa a sua logo para a aba do navegador
+    layout="wide"
+)
 
 @st.cache_resource
 def init_supabase() -> Client:
@@ -233,15 +237,17 @@ if not st.session_state.user:
     st.write("")
     st.write("")
     
-    # ESTA É A LINHA QUE HAVIA SUMIDO:
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
     with col_login:
-        # Título atualizado com o novo nome da marca e fonte mais robusta (font-weight: 800)
-        st.markdown("<h2 style='text-align: center; color: #003087; white-space: nowrap; font-weight: 800;'>Kóre Cash</h2>", unsafe_allow_html=True)
+        # Mini-colunas para garantir que a logo fique centralizada
+        col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
+        with col_img_centro:
+            # Aqui o sistema puxa a sua imagem!
+            st.image("logo_kore.png", use_container_width=True)
         
-        # Subtítulo agnóstico (preparado para CNAB e APIs)
-        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
+        # Subtítulo agnóstico
+        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -10px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
         
         st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: 10px auto 30px auto;'>", unsafe_allow_html=True)
         
@@ -268,7 +274,6 @@ if not st.session_state.user:
                 st.error(f"Erro ao processar solicitação: {e}")
                 
     st.stop()
-
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
 # ==========================================
