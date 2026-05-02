@@ -251,7 +251,7 @@ if not st.session_state.user:
         st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -25px; margin-bottom: 0px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
         
         # Ajuste 1: O primeiro valor do margin (que era 10px) foi alterado para 0px para colar no texto
-        st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: 0px auto 30px auto;'>", unsafe_allow_html=True)        
+        st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: -5px auto 30px auto;'>", unsafe_allow_html=True)        
         email = st.text_input("E-mail corporativo")
         senha = st.text_input("Senha", type="password")
         
