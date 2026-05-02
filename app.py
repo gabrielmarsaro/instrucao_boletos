@@ -279,7 +279,7 @@ if not st.session_state.user:
 # INTERFACE PRINCIPAL (ABAS)
 # ==========================================
 st.title("Gerador de Remessa CNAB 240")
-aba1, aba2, aba3 = st.tabs(["⚙️ Gerar Remessa", "🏦 Meus Convênios", "👥 Meus Clientes", ])
+aba1, aba2, aba3 = st.tabs(["🏦 Meus Convênios", "👥 Meus Clientes", "⚙️ Gerar Remessa"])
 
 # ---- ABA 1: MEUS CONVÊNIOS ----
 with aba1:
