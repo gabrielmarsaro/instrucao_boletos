@@ -207,12 +207,20 @@ def gerar_trailer_arquivo(total_lotes, total_registros):
 # ==========================================
 # FLUXO DE AUTENTICAÇÃO E LAYOUT
 # ==========================================
-# CSS para esconder o menu do Streamlit e dar cara de SaaS
+# CSS para esconder o menu, o rodapé e criar uma barra de topo institucional
 st.markdown("""
     <style>
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
+        /* Cria uma barra azul no topo da página inteira */
+        .stApp {
+            border-top: 8px solid #003087; 
+        }
+        /* Ajusta o espaçamento dos botões */
+        div.stButton > button {
+            border-radius: 4px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -220,31 +228,29 @@ if 'user' not in st.session_state:
     st.session_state.user = None
 
 if not st.session_state.user:
-    st.write("") # Espaçamento no topo
+    # Espaçamento para empurrar o login para o meio da tela verticalmente
+    st.write("")
+    st.write("")
+    st.write("")
     st.write("")
     
-    # Cria duas colunas: a esquerda (maior) para a arte, a direita para o login
-    col_img, col_login = st.columns([1.4, 1], gap="large")
+    # Cria três colunas e usa a do meio para simular um "cartão" de login
+    col_esq, col_login, col_dir = st.columns([1, 1.2, 1])
     
-    with col_img:
-        # Link de uma arte abstrata de matriz financeira/tecnologia
-        # Quando quiser usar uma imagem própria, suba um arquivo no GitHub e troque este link pelo nome do arquivo (ex: "capa.png")
-        url_imagem = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
-        st.image(url_imagem, use_container_width=True)
-        
     with col_login:
-        st.write("")
-        st.write("")
-        st.markdown("<h2 style='color: #003087;'>🏦 Portal de Remessas</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='color: gray; font-size: 14px;'>Acesso restrito para segmento Ultra Large Corporate</p>", unsafe_allow_html=True)
-        st.divider() 
+        # Cabeçalho institucional com as cores oficiais
+        st.markdown("<h1 style='text-align: center; color: #003087;'>🏦 Portal de Remessas</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px;'>Cash Management • Ultra Large Corporate</p>", unsafe_allow_html=True)
         
-        email = st.text_input("E-mail Corporativo")
-        senha = st.text_input("Senha de Acesso", type="password")
+        # Um detalhe sutil em amarelo para fechar a identidade visual
+        st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: 10px auto 30px auto;'>", unsafe_allow_html=True)
+        
+        email = st.text_input("E-mail corporativo")
+        senha = st.text_input("Senha", type="password")
         
         st.write("") 
         
-        if st.button("Entrar", type="primary", use_container_width=True):
+        if st.button("Acessar Sistema", type="primary", use_container_width=True):
             try:
                 res = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state.user = res.user
@@ -252,7 +258,9 @@ if not st.session_state.user:
             except Exception as e:
                 st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
         
-        if st.button("Solicitar Abertura de Conta", use_container_width=True):
+        st.write("") # Pequeno respiro entre os botões
+        
+        if st.button("Solicitar Acesso", use_container_width=True):
             try:
                 res = supabase.auth.sign_up({"email": email, "password": senha})
                 st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
