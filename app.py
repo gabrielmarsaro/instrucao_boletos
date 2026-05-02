@@ -204,7 +204,39 @@ def gerar_trailer_arquivo(total_lotes, total_registros):
     
     return f"{banco}{lote}{registro}{brancos1}{qtd_lotes}{qtd_registros}{qtd_contas_concil}{brancos2}"
 
-with col_login:
+# ==========================================
+# FLUXO DE AUTENTICAÇÃO E LAYOUT
+# ==========================================
+# CSS para esconder o menu, o rodapé e criar uma barra de topo institucional
+st.markdown("""
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        /* Cria uma barra azul no topo da página inteira */
+        .stApp {
+            border-top: 8px solid #003087; 
+        }
+        /* Ajusta o espaçamento dos botões */
+        div.stButton > button {
+            border-radius: 4px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+if 'user' not in st.session_state:
+    st.session_state.user = None
+
+if not st.session_state.user:
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    
+    # ESTA É A LINHA QUE HAVIA SUMIDO:
+    col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
+    
+    with col_login:
         # Título atualizado com o novo nome da marca e fonte mais robusta (font-weight: 800)
         st.markdown("<h2 style='text-align: center; color: #003087; white-space: nowrap; font-weight: 800;'>Kóre Cash</h2>", unsafe_allow_html=True)
         
@@ -214,6 +246,28 @@ with col_login:
         st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: 10px auto 30px auto;'>", unsafe_allow_html=True)
         
         email = st.text_input("E-mail corporativo")
+        senha = st.text_input("Senha", type="password")
+        
+        st.write("") 
+        
+        if st.button("Acessar Sistema", type="primary", use_container_width=True):
+            try:
+                res = supabase.auth.sign_in_with_password({"email": email, "password": senha})
+                st.session_state.user = res.user
+                st.rerun()
+            except Exception as e:
+                st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
+        
+        st.write("")
+        
+        if st.button("Solicitar Acesso", use_container_width=True):
+            try:
+                res = supabase.auth.sign_up({"email": email, "password": senha})
+                st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
+            except Exception as e:
+                st.error(f"Erro ao processar solicitação: {e}")
+                
+    st.stop()
 
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
