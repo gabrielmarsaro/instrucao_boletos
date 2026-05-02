@@ -203,6 +203,50 @@ def gerar_segmento_q(cliente_db, num_lote, num_registro, instrucao):
     
     return f"{banco}{lote}{registro}{num_seq_registro}{segmento}{brancos1}{cod_movimento}{tipo_inscricao}{inscricao}{nome}{endereco}{bairro}{cep}{cidade}{uf}{tipo_avalista}{inscricao_avalista}{nome_avalista}{banco_correspondente}{nosso_num_banco_corr}{uso_febraban}"
 
+def gerar_segmento_r(num_lote, num_registro, instrucao, multa_percentual=0, data_multa=None, mensagem=""):
+    banco = "001"
+    lote = formata_num(num_lote, 4)
+    registro = "3"
+    num_seq_registro = formata_num(num_registro, 5)
+    segmento = "R"
+    brancos1 = " "
+    cod_movimento = formata_num(instrucao[:2], 2)
+    
+    # Descontos 2 e 3 (Não utilizaremos agora, então preenchemos com zeros/vazio)
+    cod_desc2 = "0"
+    data_desc2 = formata_num(0, 8)
+    val_desc2 = formata_num(0, 15)
+    cod_desc3 = "0"
+    data_desc3 = formata_num(0, 8)
+    val_desc3 = formata_num(0, 15)
+    
+    # MULTA: Código 2 para Percentual
+    if multa_percentual > 0:
+        cod_multa = "2"
+        # Data da multa: Se não informada, o BB aceita a data do vencimento
+        dt_multa = formata_num(data_multa.strftime('%d%m%Y'), 8) if data_multa else formata_num(0, 8)
+        val_multa = formata_num(float(multa_percentual) * 100, 15)
+    else:
+        cod_multa = "0"
+        dt_multa = formata_num(0, 8)
+        val_multa = formata_num(0, 15)
+    
+    info_sacado = formata_alfa("", 10)
+    msg3 = formata_alfa(mensagem, 40) # Mensagem que sai no boleto
+    msg4 = formata_alfa("", 40)
+    brancos2 = " " * 20
+    ocor_sacado = formata_num(0, 8)
+    cod_banco_debito = formata_num(0, 3)
+    cod_agencia_debito = formata_num(0, 5)
+    dv_agencia_debito = " "
+    conta_debito = formata_num(0, 12)
+    dv_conta_debito = " "
+    dv_ag_conta_debito = " "
+    aviso_debito = "0"
+    brancos3 = " " * 9
+
+    return f"{banco}{lote}{registro}{num_seq_registro}{segmento}{brancos1}{cod_movimento}{cod_desc2}{data_desc2}{val_desc2}{cod_desc3}{data_desc3}{val_desc3}{cod_multa}{dt_multa}{val_multa}{info_sacado}{msg3}{msg4}{brancos2}{ocor_sacado}{cod_banco_debito}{cod_agencia_debito}{dv_agencia_debito}{conta_debito}{dv_conta_debito}{dv_ag_conta_debito}{aviso_debito}{brancos3}"
+
 def gerar_trailer_lote(num_lote, total_registros):
     banco = "001"
     lote = formata_num(num_lote, 4)
@@ -471,14 +515,23 @@ with aba_remessa:
             "46 - Exclusão de Negativação sem protesto",
             "47 - Alteração do Valor Nominal do Boleto"
         ]
+        
         instrucao = st.selectbox("Instrução da Remessa:", lista_instrucoes)
 
-        # LÓGICA CONDICIONAL NA UI
+        # --- NOVOS CAMPOS CONDICIONAIS (AJUSTE 2) ---
+        col_input1, col_input2, col_input3 = st.columns(3)
+        
         nova_data_vencimento = None
         if instrucao.startswith("06"):
-            nova_data_vencimento = st.date_input("Selecione a Nova Data de Vencimento para os títulos deste lote:")
+            nova_data_vencimento = col_input1.date_input("Novo Vencimento:")
 
-        st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
+        # Campos para Segmento R (Multas e Mensagens)
+        # O BB permite multa de no máximo 10% dependendo do contrato
+        multa_perc = col_input2.number_input("Multa pós-vencimento (%)", min_value=0.0, max_value=10.0, step=0.1)
+        msg_instrucao = col_input3.text_input("Mensagem (Segmento R)", max_chars=40)
+        # --------------------------------------------
+
+        st.markdown("Colunas exigidas na planilha: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
         arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
         
         if arquivo_boletos:
@@ -486,13 +539,16 @@ with aba_remessa:
             st.dataframe(df_boletos.head(3))
             
             if st.button("Adicionar ao Lote"):
+                # Agora incluímos 'multa' e 'mensagem' no dicionário que vai para o carrinho
                 st.session_state.lotes.append({
                     "convenio": dict_conv_remessa[conv_escolhido],
                     "instrucao": instrucao,
                     "df": df_boletos,
-                    "nova_data": nova_data_vencimento
+                    "nova_data": nova_data_vencimento,
+                    "multa": multa_perc,
+                    "mensagem": msg_instrucao
                 })
-                st.success("Lote adicionado ao carrinho!")
+                st.success(f"Lote adicionado! (Multa: {multa_perc}% | Mensagem: {msg_instrucao if msg_instrucao else 'N/A'})")
 
         if st.session_state.lotes:
             st.subheader(f"Carrinho: {len(st.session_state.lotes)} lote(s) pronto(s)")
