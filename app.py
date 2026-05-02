@@ -211,34 +211,38 @@ if 'user' not in st.session_state:
     st.session_state.user = None
 
 if not st.session_state.user:
-    st.title("🔒 Login no Sistema de Remessas")
-    email = st.text_input("E-mail")
-    senha = st.text_input("Senha", type="password")
+    # Cria três colunas para centralizar o login. A do meio (1.5) é ligeiramente mais larga.
+    col_esq, col_centro, col_dir = st.columns([1, 1.5, 1])
     
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Entrar", use_container_width=True):
+    with col_centro:
+        # Título mais limpo e subtítulo corporativo
+        st.markdown("<h2 style='text-align: center;'>🏦 Portal de Remessas</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray;'>Acesso restrito para clientes corporativos</p>", unsafe_allow_html=True)
+        st.divider() # Linha elegante para separar o cabeçalho dos inputs
+        
+        email = st.text_input("E-mail Corporativo")
+        senha = st.text_input("Senha de Acesso", type="password")
+        
+        st.write("") # Espaçamento sutil antes dos botões
+        
+        # Botão principal em destaque (type="primary")
+        if st.button("Entrar", type="primary", use_container_width=True):
             try:
                 res = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state.user = res.user
                 st.rerun()
             except Exception as e:
-                st.error(f"Erro no login: {e}")
-    with col2:
-        if st.button("Criar Conta", use_container_width=True):
+                st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
+        
+        # Botão secundário sem destaque, logo abaixo
+        if st.button("Solicitar Abertura de Conta", use_container_width=True):
             try:
                 res = supabase.auth.sign_up({"email": email, "password": senha})
-                st.success("Conta criada! Confirme seu email ou faça login.")
+                st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
             except Exception as e:
-                st.error(f"Erro ao registrar: {e}")
+                st.error(f"Erro ao processar solicitação: {e}")
+                
     st.stop()
-
-# Logout
-st.sidebar.write(f"Logado como: {st.session_state.user.email}")
-if st.sidebar.button("Sair"):
-    supabase.auth.sign_out()
-    st.session_state.user = None
-    st.rerun()
 
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
