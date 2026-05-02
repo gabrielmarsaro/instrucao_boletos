@@ -112,7 +112,7 @@ def gerar_header_lote(convenio, num_lote):
     
     return f"{banco}{lote}{registro}{operacao}{servico}{forma_lancamento}{versao_layout}{brancos1}{inscricao_tipo}{cnpj}{codigo_convenio}{agencia}{dv_agencia}{conta}{dv_conta}{dv_ag_conta}{nome_empresa}{mensagem_1}{mensagem_2}{nsa}{data_gravacao}{data_credito}{brancos2}"
 
-def gerar_segmento_p(convenio, boleto, num_lote, num_registro, instrucao):
+def gerar_segmento_p(convenio, boleto, num_lote, num_registro, instrucao, nova_data=None):
     banco = "001"
     lote = formata_num(num_lote, 4)
     registro = "3"
@@ -132,7 +132,13 @@ def gerar_segmento_p(convenio, boleto, num_lote, num_registro, instrucao):
     emissao_boleto = "2"
     distribuicao = "2"
     num_documento = formata_alfa(boleto['nº documento'], 15)
-    vencimento = formata_num(pd.to_datetime(boleto['vencimento líquido']).strftime('%d%m%Y'), 8)
+    
+    # LÓGICA CRÍTICA: Substituição da data de vencimento
+    if cod_movimento == "06" and nova_data:
+        vencimento = formata_num(nova_data.strftime('%d%m%Y'), 8)
+    else:
+        vencimento = formata_num(pd.to_datetime(boleto['vencimento líquido']).strftime('%d%m%Y'), 8)
+        
     valor = formata_num(float(boleto['montante']) * 100, 15)
     agencia_cobradora = "00000"
     dv_ag_cobradora = " "
@@ -149,16 +155,15 @@ def gerar_segmento_p(convenio, boleto, num_lote, num_registro, instrucao):
     valor_abatimento = formata_num(0, 15)
     uso_empresa = formata_alfa(boleto['cliente'], 25)
     
-    # Lógica Crítica: Tratamento de Protesto / Negativação
     if cod_movimento in ["45", "46"]:
-        cod_protesto = "8" # 8 para Negativação sem Protesto
+        cod_protesto = "8" 
     else:
-        cod_protesto = "3" # 3 para Não Protestar
+        cod_protesto = "3" 
         
     dias_protesto = "00"
     cod_baixa = "0"
     dias_baixa = "000"
-    moeda = "00" # Exigência BB: Zeros quando a moeda for o Real
+    moeda = "00" 
     uso_bb = formata_num(0, 10)
     brancos2 = " "
     
@@ -468,7 +473,28 @@ with aba_remessa:
             "47 - Alteração do Valor Nominal do Boleto"
         ]
         instrucao = st.selectbox("Instrução da Remessa:", lista_instrucoes)
+        
+        # LÓGICA CONDICIONAL NA UI
+        nova_data_vencimento = None
+        if instrucao.startswith("06"):
+            nova_data_vencimento = st.date_input("Selecione a Nova Data de Vencimento para os títulos deste lote:")
 
+        st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
+        arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
+        
+        if arquivo_boletos:
+            df_boletos = pd.read_excel(arquivo_boletos)
+            st.dataframe(df_boletos.head(3))
+            
+            if st.button("Adicionar ao Lote"):
+                # Armazena dataframe, instrução e a NOVA DATA no state
+                st.session_state.lotes.append({
+                    "convenio": dict_conv_remessa[conv_escolhido],
+                    "instrucao": instrucao,
+                    "df": df_boletos,
+                    "nova_data": nova_data_vencimento # Passando a data para a memória
+                })
+                st.success("Lote adicionado ao carrinho!")
         
         st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
         arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
