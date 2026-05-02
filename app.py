@@ -473,12 +473,13 @@ with aba_remessa:
             "47 - Alteração do Valor Nominal do Boleto"
         ]
         instrucao = st.selectbox("Instrução da Remessa:", lista_instrucoes)
-        
+
         # LÓGICA CONDICIONAL NA UI
         nova_data_vencimento = None
         if instrucao.startswith("06"):
             nova_data_vencimento = st.date_input("Selecione a Nova Data de Vencimento para os títulos deste lote:")
 
+        # Este bloco inteiro substitui o antigo para não haver duplicidade de chaves
         st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
         arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
         
