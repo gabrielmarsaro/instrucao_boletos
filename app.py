@@ -244,7 +244,7 @@ if not st.session_state.user:
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
         with col_img_centro:
             # Aqui o sistema puxa a sua imagem
-            st.image("logo_kore.png.svg", use_container_width=True)
+            st.image("logo_kore.svg", use_container_width=True)
         
         # Ajuste 2: margin-top alterado para -25px para subir mais o texto em direção à logo
         # Também adicionei margin-bottom: 0px para não empurrar a linha amarela para baixo
