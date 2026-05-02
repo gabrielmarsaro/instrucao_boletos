@@ -267,7 +267,7 @@ if not st.session_state.user:
         
         st.write("")
         
-        if st.button("Solicitar Acesso", use_container_width=True):
+        if st.button("Criar Conta", use_container_width=True):
             try:
                 res = supabase.auth.sign_up({"email": email, "password": senha})
                 st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
