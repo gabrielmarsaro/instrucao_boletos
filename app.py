@@ -228,21 +228,21 @@ if 'user' not in st.session_state:
     st.session_state.user = None
 
 if not st.session_state.user:
-    # Espaçamento para empurrar o login para o meio da tela verticalmente
     st.write("")
     st.write("")
     st.write("")
     st.write("")
     
-    # Cria três colunas e usa a do meio para simular um "cartão" de login
-    col_esq, col_login, col_dir = st.columns([1, 1.2, 1])
+    # Aumentei um pouco a coluna do meio (de 1.2 para 1.4) para dar mais espaço ao texto
+    col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
     with col_login:
-        # Cabeçalho institucional com as cores oficiais
-        st.markdown("<h1 style='text-align: center; color: #003087;'>🏦 Portal de Remessas</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px;'>Cash Management • Ultra Large Corporate</p>", unsafe_allow_html=True)
+        # white-space: nowrap impede que o título quebre em duas linhas
+        st.markdown("<h2 style='text-align: center; color: #003087; white-space: nowrap;'>🏦 Portal de Remessas</h2>", unsafe_allow_html=True)
         
-        # Um detalhe sutil em amarelo para fechar a identidade visual
+        # Frase atualizada para o tom corporativo adequado
+        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px;'>Gestão de Recebíveis Corporativos</p>", unsafe_allow_html=True)
+        
         st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: 10px auto 30px auto;'>", unsafe_allow_html=True)
         
         email = st.text_input("E-mail corporativo")
@@ -258,7 +258,7 @@ if not st.session_state.user:
             except Exception as e:
                 st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
         
-        st.write("") # Pequeno respiro entre os botões
+        st.write("")
         
         if st.button("Solicitar Acesso", use_container_width=True):
             try:
