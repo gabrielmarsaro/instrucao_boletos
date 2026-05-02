@@ -535,6 +535,9 @@ with aba_remessa:
                     df_bol = lote['df']
                     inst = lote['instrucao']
                     
+                    # Resgata a data salva no carrinho (se não houver, retorna None)
+                    nova_data_lote = lote.get('nova_data') 
+                    
                     if index_lote == 1:
                         linhas_arquivo.append(gerar_header_arquivo(conv))
                         total_registros_arquivo += 1
@@ -542,24 +545,23 @@ with aba_remessa:
                     linhas_arquivo.append(gerar_header_lote(conv, index_lote))
                     
                     qtd_registros_lote = 0
-                    seq_registro_lote = 1 # Segue a sequência dentro do lote
+                    seq_registro_lote = 1 
                     
                     for idx, row_boleto in df_bol.iterrows():
                         codigo_cliente = str(row_boleto['cliente']).strip()
                         
-                        # Regra Crítica: Cruzamento de Dados!
                         if codigo_cliente not in clientes_map:
                             st.warning(f"Atenção: Cliente '{codigo_cliente}' não encontrado no Banco de Dados. Boleto {row_boleto['nosso numero']} pulado.")
                             continue
                             
                         dados_cliente_db = clientes_map[codigo_cliente]
                         
-                        # Segmento P
-                        linhas_arquivo.append(gerar_segmento_p(conv, row_boleto, index_lote, seq_registro_lote, inst))
+                        # Passando a nova_data_lote para a função do Segmento P
+                        linhas_arquivo.append(gerar_segmento_p(conv, row_boleto, index_lote, seq_registro_lote, inst, nova_data_lote))
                         seq_registro_lote += 1
                         qtd_registros_lote += 1
                         
-                        # Segmento Q
+                        # Segmento Q continua igual...
                         linhas_arquivo.append(gerar_segmento_q(dados_cliente_db, index_lote, seq_registro_lote, inst))
                         seq_registro_lote += 1
                         qtd_registros_lote += 1
