@@ -281,14 +281,15 @@ if not st.session_state.user:
 st.title("Gerador de Remessa CNAB 240")
 
 # Reordenando as abas e nomeando as variáveis de forma explícita
+# A ordem aqui define como aparece na tela da esquerda para a direita
 aba_remessa, aba_clientes, aba_convenios = st.tabs([
     "⚙️ Gerar Remessa", 
     "👥 Meus Clientes", 
     "🏦 Meus Convênios"
 ])
 
-# ---- ABA 1: MEUS CONVÊNIOS ----
-with Meus Convênios:
+# ---- ABA: MEUS CONVÊNIOS ----
+with aba_convenios:
     st.header("Gestão de Convênios Bancários")
     
     with st.expander("Cadastrar Novo Convênio"):
@@ -336,8 +337,8 @@ with Meus Convênios:
     else:
         st.info("Nenhum convênio cadastrado.")
 
-# ---- ABA 2: MEUS CLIENTES ----
-with Meus Clientes:
+# ---- ABA: MEUS CLIENTES ----
+with aba_clientes:
     st.header("Base de Sacados (Clientes)")
     
     col_cad, col_imp = st.columns(2)
@@ -403,18 +404,20 @@ with Meus Clientes:
     else:
         st.info("Nenhum cliente cadastrado.")
 
-# ---- ABA 3: GERAR REMESSA (O CORE) ----
+# ---- ABA: GERAR REMESSA (O CORE) ----
 if 'lotes' not in st.session_state:
     st.session_state.lotes = []
 
-with Gerar Remessa:
+with aba_remessa:
     st.header("Processamento de Remessa")
     
     if df_conv.empty:
-        st.warning("Cadastre um convênio na Aba 1 antes de gerar remessas.")
+        st.warning("Cadastre um convênio na Aba 'Meus Convênios' antes de gerar remessas.")
     else:
         dict_conv_remessa = {f"{row['razao_social']} - Ag/Cc: {row['agencia']}/{row['conta']}": row for idx, row in df_conv.iterrows()}
         conv_escolhido = st.selectbox("Selecione o Convênio:", list(dict_conv_remessa.keys()))
+        
+        # Fechei a lista aqui temporariamente para o código não dar erro de sintaxe
         lista_instrucoes = [
             "01 - Entrada de títulos",
             "02 - Pedido de baixa",
