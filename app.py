@@ -10,7 +10,7 @@ import io
 # ==========================================
 st.set_page_config(
     page_title="Kóre Cash | Hub de Recebíveis",
-    page_icon="logo_kore.png", # Puxa a sua logo para a aba do navegador
+    page_icon="logo_kore.svg", # Puxa a sua logo para a aba do navegador
     layout="wide"
 )
 
@@ -244,7 +244,7 @@ if not st.session_state.user:
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
         with col_img_centro:
             # Aqui o sistema puxa a sua imagem!
-            st.image("logo_kore.png", use_container_width=True)
+            st.image("logo_kore.svg", use_container_width=True)
         
         # Subtítulo agnóstico
         st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -10px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
