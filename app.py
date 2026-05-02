@@ -44,16 +44,26 @@ def formata_num(numero, tamanho):
 # ==========================================
 # GERAÇÃO DOS SEGMENTOS CNAB 240 (BB)
 # ==========================================
+def formatar_convenio_bb(convenio, is_teste=False):
+    """
+    O BB exige a formatação exata de 20 posições para o convênio:
+    9 posições convênio + 0014 + 2 posições carteira + 3 posições variação + 2 espaços (ou TS para teste)
+    """
+    conv_str = str(convenio['convenio']).zfill(9)
+    cart_str = str(convenio['carteira']).zfill(2)
+    var_str = str(convenio['variacao']).zfill(3)
+    final = "TS" if is_teste else "  "
+    return f"{conv_str}0014{cart_str}{var_str}{final}"
+
 def gerar_header_arquivo(convenio):
-    # Layout padrão FEBRABAN/BB 240 posições
-    # Adapte os campos fixos conforme manual técnico específico do banco
     banco = "001"
     lote = "0000"
     registro = "0"
     brancos1 = " " * 9
     inscricao_tipo = "2" # 2 para CNPJ
     cnpj = formata_num(convenio['cnpj'], 14)
-    codigo_convenio = formata_alfa(convenio['convenio'], 20)
+    # Chamada da nova formatação de convênio BB
+    codigo_convenio = formatar_convenio_bb(convenio)
     agencia = formata_num(convenio['agencia'], 5)
     dv_agencia = formata_alfa(convenio['dv_agencia'], 1)
     conta = formata_num(convenio['conta'], 12)
@@ -85,7 +95,8 @@ def gerar_header_lote(convenio, num_lote):
     brancos1 = " "
     inscricao_tipo = "2"
     cnpj = formata_num(convenio['cnpj'], 15)
-    codigo_convenio = formata_alfa(convenio['convenio'], 20)
+    # Chamada da nova formatação de convênio BB
+    codigo_convenio = formatar_convenio_bb(convenio)
     agencia = formata_num(convenio['agencia'], 5)
     dv_agencia = formata_alfa(convenio['dv_agencia'], 1)
     conta = formata_num(convenio['conta'], 12)
@@ -137,11 +148,17 @@ def gerar_segmento_p(convenio, boleto, num_lote, num_registro, instrucao):
     valor_iof = formata_num(0, 15)
     valor_abatimento = formata_num(0, 15)
     uso_empresa = formata_alfa(boleto['cliente'], 25)
-    cod_protesto = "3"
+    
+    # Lógica Crítica: Tratamento de Protesto / Negativação
+    if cod_movimento in ["45", "46"]:
+        cod_protesto = "8" # 8 para Negativação sem Protesto
+    else:
+        cod_protesto = "3" # 3 para Não Protestar
+        
     dias_protesto = "00"
     cod_baixa = "0"
     dias_baixa = "000"
-    moeda = "09"
+    moeda = "00" # Exigência BB: Zeros quando a moeda for o Real
     uso_bb = formata_num(0, 10)
     brancos2 = " "
     
@@ -156,7 +173,6 @@ def gerar_segmento_q(cliente_db, num_lote, num_registro, instrucao):
     brancos1 = " "
     cod_movimento = formata_num(instrucao[:2], 2)
     
-    # Lógica Crítica: Identificar se o cliente é PF ou PJ
     cnpj_cpf_limpo = str(cliente_db['cnpj_cpf']).replace('.', '').replace('-', '').replace('/', '')
     tipo_inscricao = "2" if len(cnpj_cpf_limpo) > 11 else "1"
     inscricao = formata_num(cnpj_cpf_limpo, 15)
@@ -173,9 +189,14 @@ def gerar_segmento_q(cliente_db, num_lote, num_registro, instrucao):
     nome_avalista = formata_alfa("", 40)
     banco_correspondente = "000"
     nosso_num_banco_corr = formata_alfa("", 20)
-    brancos2 = " " * 8
     
-    return f"{banco}{lote}{registro}{num_seq_registro}{segmento}{brancos1}{cod_movimento}{tipo_inscricao}{inscricao}{nome}{endereco}{bairro}{cep}{cidade}{uf}{tipo_avalista}{inscricao_avalista}{nome_avalista}{banco_correspondente}{nosso_num_banco_corr}{brancos2}"
+    # Lógica Crítica: Preenchimento do Agente Negativador (Posições 233 e 234)
+    if cod_movimento in ["45", "46"]:
+        uso_febraban = "10      " # 10 para Serasa
+    else:
+        uso_febraban = "        " # 8 espaços em branco
+    
+    return f"{banco}{lote}{registro}{num_seq_registro}{segmento}{brancos1}{cod_movimento}{tipo_inscricao}{inscricao}{nome}{endereco}{bairro}{cep}{cidade}{uf}{tipo_avalista}{inscricao_avalista}{nome_avalista}{banco_correspondente}{nosso_num_banco_corr}{uso_febraban}"
 
 def gerar_trailer_lote(num_lote, total_registros):
     banco = "001"
