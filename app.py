@@ -217,7 +217,7 @@ if not st.session_state.user:
     with col_centro:
         # Título mais limpo e subtítulo corporativo
         st.markdown("<h2 style='text-align: center;'>🏦 Portal de Remessas</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: gray;'>Acesso restrito para clientes corporativos</p>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray;'>Cobrança Fácil</p>", unsafe_allow_html=True)
         st.divider() # Linha elegante para separar o cabeçalho dos inputs
         
         email = st.text_input("E-mail Corporativo")
