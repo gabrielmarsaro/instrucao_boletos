@@ -443,7 +443,6 @@ with aba_remessa:
         dict_conv_remessa = {f"{row['razao_social']} - Ag/Cc: {row['agencia']}/{row['conta']}": row for idx, row in df_conv.iterrows()}
         conv_escolhido = st.selectbox("Selecione o Convênio:", list(dict_conv_remessa.keys()))
         
-        # Fechei a lista aqui temporariamente para o código não dar erro de sintaxe
         lista_instrucoes = [
             "01 - Entrada de títulos",
             "02 - Pedido de baixa",
@@ -479,7 +478,6 @@ with aba_remessa:
         if instrucao.startswith("06"):
             nova_data_vencimento = st.date_input("Selecione a Nova Data de Vencimento para os títulos deste lote:")
 
-        # Este bloco inteiro substitui o antigo para não haver duplicidade de chaves
         st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
         arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
         
@@ -488,28 +486,11 @@ with aba_remessa:
             st.dataframe(df_boletos.head(3))
             
             if st.button("Adicionar ao Lote"):
-                # Armazena dataframe, instrução e a NOVA DATA no state
                 st.session_state.lotes.append({
                     "convenio": dict_conv_remessa[conv_escolhido],
                     "instrucao": instrucao,
                     "df": df_boletos,
-                    "nova_data": nova_data_vencimento # Passando a data para a memória
-                })
-                st.success("Lote adicionado ao carrinho!")
-        
-        st.markdown("Colunas exigidas na planilha de boletos: `nosso numero`, `nº documento`, `vencimento líquido`, `total corrigido`, `montante`, `cliente`")
-        arquivo_boletos = st.file_uploader("Upload da Planilha de Boletos (.xlsx)", type=["xlsx", "xls"], key="up_bol")
-        
-        if arquivo_boletos:
-            df_boletos = pd.read_excel(arquivo_boletos)
-            st.dataframe(df_boletos.head(3))
-            
-            if st.button("Adicionar ao Lote"):
-                # Armazena dataframe e instrução no state
-                st.session_state.lotes.append({
-                    "convenio": dict_conv_remessa[conv_escolhido],
-                    "instrucao": instrucao,
-                    "df": df_boletos
+                    "nova_data": nova_data_vencimento
                 })
                 st.success("Lote adicionado ao carrinho!")
 
@@ -521,22 +502,19 @@ with aba_remessa:
                 
             if st.button("🚀 Gerar Arquivo Remessa Final", type="primary"):
                 if df_cli.empty:
-                    st.error("Sua base de clientes está vazia. Cadastre na Aba 2 para gerar os Segmentos Q.")
+                    st.error("Sua base de clientes está vazia. Cadastre na Aba 'Meus Clientes' para gerar os Segmentos Q.")
                     st.stop()
                 
                 linhas_arquivo = []
                 total_lotes_arquivo = len(st.session_state.lotes)
-                total_registros_arquivo = 0 # Inclui header/trailer arquivo
+                total_registros_arquivo = 0 
                 
-                # Para simplificar busca rápida, transforma df_cli em dict tendo 'id_cliente_planilha' como chave
                 clientes_map = df_cli.set_index('id_cliente_planilha').to_dict('index')
                 
                 for index_lote, lote in enumerate(st.session_state.lotes, start=1):
                     conv = lote['convenio']
                     df_bol = lote['df']
                     inst = lote['instrucao']
-                    
-                    # Resgata a data salva no carrinho (se não houver, retorna None)
                     nova_data_lote = lote.get('nova_data') 
                     
                     if index_lote == 1:
@@ -557,39 +535,33 @@ with aba_remessa:
                             
                         dados_cliente_db = clientes_map[codigo_cliente]
                         
-                        # Passando a nova_data_lote para a função do Segmento P
                         linhas_arquivo.append(gerar_segmento_p(conv, row_boleto, index_lote, seq_registro_lote, inst, nova_data_lote))
                         seq_registro_lote += 1
                         qtd_registros_lote += 1
                         
-                        # Segmento Q continua igual...
                         linhas_arquivo.append(gerar_segmento_q(dados_cliente_db, index_lote, seq_registro_lote, inst))
                         seq_registro_lote += 1
                         qtd_registros_lote += 1
                     
-                    # O Trailer Lote considera os registros de detalhe (P+Q) + Header do Lote (1) + Trailer do Lote (1)
                     registros_total_lote_formatado = qtd_registros_lote + 2
                     linhas_arquivo.append(gerar_trailer_lote(index_lote, registros_total_lote_formatado))
                     total_registros_arquivo += registros_total_lote_formatado
                 
-                # Finalizando o Arquivo (Header Arq + Total de Registros dos Lotes + Trailer Arq)
-                total_registros_arquivo += 1 # Contando o próprio trailer do arquivo
+                total_registros_arquivo += 1 
                 linhas_arquivo.append(gerar_trailer_arquivo(total_lotes_arquivo, total_registros_arquivo))
                 
-                texto_remessa = "\r\n".join(linhas_arquivo) + "\r\n" # Febraban exige CRLF no final
+                texto_remessa = "\r\n".join(linhas_arquivo) + "\r\n" 
                 
-                # Validar tamanho das strings (Garantia de Qualidade)
                 erros_tamanho = [i for i, linha in enumerate(linhas_arquivo) if len(linha) != 240]
                 if erros_tamanho:
                     st.error(f"Erro Crítico de Layout: As linhas {erros_tamanho} não possuem 240 posições exatas. Revise as funções de formatação.")
                 else:
                     st.success("Remessa processada com sucesso!")
                     
-                    # Disponibilizar Download
-                    buffer = io.BytesIO(texto_remessa.encode('latin-1')) # Latin-1 é padrão para bancos (sem acento)
+                    buffer = io.BytesIO(texto_remessa.encode('latin-1')) 
                     st.download_button(
                         label="⬇️ Baixar Arquivo .REM",
                         data=buffer,
-                        file_name=f"CB{datetime.now().strftime('%d%m')}.REM", # Padrão Febraban p/ envio
+                        file_name=f"CB{datetime.now().strftime('%d%m')}.REM", 
                         mime="text/plain"
                     )
