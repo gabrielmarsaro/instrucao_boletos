@@ -309,8 +309,7 @@ if not st.session_state.user:
     
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
-    _login:
-        # Mini-colunas para garantir que a logo fique centralizada
+         # Mini-colunas para garantir que a logo fique centralizada
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
         _img_centro:
             # Aqui o sistema puxa a sua imagem
