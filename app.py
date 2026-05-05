@@ -309,10 +309,10 @@ if not st.session_state.user:
     
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
-    with col_login:
+    _login:
         # Mini-colunas para garantir que a logo fique centralizada
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
-        with col_img_centro:
+        _img_centro:
             # Aqui o sistema puxa a sua imagem
             st.image("logo_kore.svg", use_container_width=True)
         
@@ -412,7 +412,7 @@ with aba_clientes:
     st.header("Base de Sacados (Clientes)")
     
     col_cad, col_imp = st.columns(2)
-    with col_cad:
+    _cad:
         with st.expander("Cadastrar Manualmente"):
             with st.form("form_cliente"):
                 id_plan = st.text_input("Código Único do Cliente (Ex: CL-001)")
@@ -436,20 +436,43 @@ with aba_clientes:
                     st.rerun()
                     
     with col_imp:
-        with st.expander("Importação em Lote (.xlsx)"):
-            st.markdown("Colunas exigidas: `cliente`, `cnpj`, `nome`, `endereco`, `bairro`, `cep`, `cidade`, `uf`")
-            arquivo_clientes = st.file_uploader("Subir planilha", type=["xlsx", "xls"], key="up_cli")
+        with st.expander("Importação em Lote (.csv)"):
+            st.markdown("Baixe o template, preencha os dados no Excel, **salve como CSV (Separado por vírgulas)** e faça o upload.")
+            
+            # --- GERADOR DO TEMPLATE PARA DOWNLOAD (Em ANSI/windows-1252) ---
+            df_template_cli = pd.DataFrame(columns=['cliente', 'cnpj', 'nome', 'endereco', 'bairro', 'cep', 'cidade', 'uf'])
+            csv_template_cli = df_template_cli.to_csv(index=False, sep=';', encoding='windows-1252')
+            
+            st.download_button(
+                label="⬇️ Baixar Template de Clientes",
+                data=csv_template_cli,
+                file_name="template_clientes_kore.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+            
+            st.markdown("---")
+            
+            # --- UPLOAD DO ARQUIVO CSV ---
+            arquivo_clientes = st.file_uploader("Subir arquivo CSV", type=["csv"], key="up_cli")
+            
             if arquivo_clientes and st.button("Processar Importação"):
-                df_imp = pd.read_excel(arquivo_clientes)
-                df_imp = df_imp.rename(columns={"cliente": "id_cliente_planilha", "cnpj": "cnpj_cpf"})
-                df_imp['user_id'] = st.session_state.user.id
-                
-                # Conversão rápida de lote para dicionários via Pandas
-                records = df_imp.to_dict(orient='records')
-                # Inserção (Cuidado com lotes enormes, o Supabase limite inserts massivos, pode precisar quebrar em chunks)
-                supabase.table("clientes").insert(records).execute()
-                st.success(f"{len(records)} clientes importados!")
-                st.rerun()
+                try:
+                    # Lê o CSV exigindo ponto e vírgula e formato ANSI
+                    df_imp = pd.read_csv(arquivo_clientes, sep=';', encoding='windows-1252', dtype=str)
+                    df_imp.columns = df_imp.columns.str.strip().str.lower()
+                    
+                    df_imp = df_imp.rename(columns={"cliente": "id_cliente_planilha", "cnpj": "cnpj_cpf"})
+                    df_imp['user_id'] = st.session_state.user.id
+                    
+                    records = df_imp.to_dict(orient='records')
+                    supabase.table("clientes").insert(records).execute()
+                    
+                    st.success(f"{len(records)} clientes importados com sucesso!")
+                    st.rerun()
+                except Exception as e:
+                    st.error("Erro na leitura. Verifique se salvou como CSV separado por vírgulas (;).")
+                    st.error(f"Detalhe técnico: {e}")
 
     st.subheader("Clientes Cadastrados")
     res_cli = supabase.table("clientes").select("*").execute()
