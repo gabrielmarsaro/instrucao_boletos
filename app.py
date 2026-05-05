@@ -627,7 +627,8 @@ with aba_remessa:
                 else:
                     st.success("Remessa processada com sucesso!")
                     
-                    buffer = io.BytesIO(texto_remessa.encode('latin-1')) 
+                    # O windows-1252 garante o padrão ANSI / 1 byte por caractere exigido pela Febraban/BB
+                    buffer = io.BytesIO(texto_remessa.encode('windows-1252')) 
                     st.download_button(
                         label="⬇️ Baixar Arquivo .REM",
                         data=buffer,
