@@ -410,7 +410,8 @@ with aba_clientes:
     st.header("Base de Sacados (Clientes)")
     
     col_cad, col_imp = st.columns(2)
-    _cad:
+    
+    with col_cad:
         with st.expander("Cadastrar Manualmente"):
             with st.form("form_cliente"):
                 id_plan = st.text_input("Código Único do Cliente (Ex: CL-001)")
