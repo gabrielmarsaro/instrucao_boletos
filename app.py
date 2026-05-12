@@ -282,8 +282,8 @@ def gerar_trailer_arquivo(total_lotes, total_registros):
 # FLUXO DE AUTENTICAÇÃO E LAYOUT
 # ==========================================
 # CSS para esconder o menu, o rodapé e criar uma barra de topo institucional
-st.markdown("""
-    <style>
+    st.markdown("""
+       <style>
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
