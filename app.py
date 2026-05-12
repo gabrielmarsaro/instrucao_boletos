@@ -309,18 +309,17 @@ if not st.session_state.user:
     
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
-         # Mini-colunas para garantir que a logo fique centralizada
-    col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
-    with cool_img_centro:
+    with col_login:
+        # Mini-colunas para garantir que a logo fique centralizada
+        col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
+        with col_img_centro:
             # Aqui o sistema puxa a sua imagem
             st.image("logo_kore.svg", use_container_width=True)
         
-        # Ajuste 2: margin-top alterado para -25px para subir mais o texto em direção à logo
-        # Também adicionei margin-bottom: 0px para não empurrar a linha amarela para baixo
-    st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -25px; margin-bottom: 0px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
+        # Textos e separadores
+        st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -25px; margin-bottom: 0px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
+        st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: -5px auto 30px auto;'>", unsafe_allow_html=True)        
         
-        # Ajuste 1: O primeiro valor do margin (que era 10px) foi alterado para 0px para colar no texto
-    st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: -5px auto 30px auto;'>", unsafe_allow_html=True)        
         email = st.text_input("E-mail corporativo")
         senha = st.text_input("Senha", type="password")
         
