@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pd
+import pandas as pdf
 from supabase import create_client, Client
 import unicodedata
 from datetime import datetime
@@ -301,8 +301,11 @@ def gerar_trailer_arquivo(total_lotes, total_registros):
 if 'user' not in st.session_state:
     st.session_state.user = None
 
+# 1. INICIALIZAÇÃO DO ESTADO (No topo, antes de tudo)
+if 'login_error' not in st.session_state:
+    st.session_state.login_error = False
+
 if not st.session_state.user:
-    st.write("")
     st.write("")
     st.write("")
     st.write("")
@@ -310,38 +313,68 @@ if not st.session_state.user:
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
     with col_login:
-        # Mini-colunas para garantir que a logo fique centralizada
+        # LOGO E TÍTULO
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
         with col_img_centro:
-            # Aqui o sistema puxa a sua imagem
             st.image("logo_kore.svg", use_container_width=True)
         
-        # Textos e separadores
         st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -25px; margin-bottom: 0px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
         st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: -5px auto 30px auto;'>", unsafe_allow_html=True)        
         
-        email = st.text_input("E-mail corporativo")
-        senha = st.text_input("Senha", type="password")
+        # INPUTS
+        email = st.text_input("E-mail corporativo", key="main_email")
+        senha = st.text_input("Senha", type="password", key="main_password")
         
         st.write("") 
-        
+
+        # BOTÃO DE ACESSO
         if st.button("Acessar Sistema", type="primary", use_container_width=True):
             try:
                 res = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state.user = res.user
+                st.session_state.login_error = False
                 st.rerun()
             except Exception as e:
-                st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
-        
+                # ATIVA O MODO DE ERRO
+                st.session_state.login_error = True
+                # O st.rerun() aqui força o Streamlit a ler o código de novo e mostrar o botão
+                st.rerun()
+
+        # ÁREA DINÂMICA DE BOTÕES (REAGE AO ERRO)
         st.write("")
         
-        if st.button("Criar Conta", use_container_width=True):
-            try:
-                res = supabase.auth.sign_up({"email": email, "password": senha})
-                st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
-            except Exception as e:
-                st.error(f"Erro ao processar solicitação: {e}")
-                
+        if st.session_state.login_error:
+            # MOSTRA MENSAGEM DE ERRO
+            st.error("Utilizador ou senha incorretos.")
+            
+            # MOSTRA BOTÕES LADO A LADO SE HOUVER ERRO
+            c1, c2 = st.columns(2)
+            with c1:
+                if st.button("Criar Conta", use_container_width=True, key="btn_criar_erro"):
+                    try:
+                        supabase.auth.sign_up({"email": email, "password": senha})
+                        st.success("Verifique o seu e-mail!")
+                    except: st.error("Erro ao criar.")
+            
+            with c2:
+                # O BOTÃO "ESQUECI A SENHA" APARECE AQUI
+                if st.button("Esqueci a Senha 🔑", use_container_width=True, key="btn_forgot"):
+                    if not email:
+                        st.warning("Introduza o seu e-mail acima.")
+                    else:
+                        try:
+                            supabase.auth.reset_password_for_email(email)
+                            st.success("Link de recuperação enviado!")
+                        except: st.error("Erro ao processar pedido.")
+        
+        else:
+            # SE NÃO HOUVER ERRO, MOSTRA APENAS O CRIAR CONTA (CENTRALIZADO)
+            if st.button("Criar Conta", use_container_width=True, key="btn_criar_normal"):
+                try:
+                    supabase.auth.sign_up({"email": email, "password": senha})
+                    st.success("Solicitação enviada para o e-mail.")
+                except: st.error("Erro ao processar.")
+
     st.stop()
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
