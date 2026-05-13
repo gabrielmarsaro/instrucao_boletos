@@ -401,9 +401,10 @@ with st.sidebar:
         use_container_width=True
     )
      
-    # Gerador do Template de Boletos
-    df_template_bol = pd.DataFrame(columns=['nosso numero', 'nº documento', 'vencimento líquido', 'total corrigido', 'montante', 'cliente'])
-    csv_template_bol = df_template_bol.to_csv(index=False, sep=';', encoding='windows-1252')
+    # Gerador do Template de Boletos (Sem caracteres especiais)
+    df_template_bol = pd.DataFrame(columns=['nosso numero', 'numero documento', 'vencimento liquido', 'total corrigido', 'montante', 'cliente'])
+    csv_template_bol = df_template_bol.to_csv(index=False, sep=';')
+    
     st.download_button(
         label="📄 Baixar Modelo de Boletos",
         data=csv_template_bol,
