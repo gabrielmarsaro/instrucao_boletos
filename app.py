@@ -400,19 +400,7 @@ with st.sidebar:
         mime="text/csv",
         use_container_width=True
     )
-    
-    # Gerador do Template de Boletos (Forçando os bytes para ANSI)
-    df_template_bol = pd.DataFrame(columns=['nosso numero', 'nº documento', 'vencimento líquido', 'total corrigido', 'montante', 'cliente'])
-    csv_bytes_bol = df_template_bol.to_csv(index=False, sep=';').encode('windows-1252')
-    
-    st.download_button(
-        label="📄 Baixar Modelo de Boletos",
-        data=csv_bytes_bol,
-        file_name="modelo_boletos_kore.csv",
-        mime="text/csv",
-        use_container_width=True
-    )
-    
+     
     # Gerador do Template de Boletos
     df_template_bol = pd.DataFrame(columns=['nosso numero', 'nº documento', 'vencimento líquido', 'total corrigido', 'montante', 'cliente'])
     csv_template_bol = df_template_bol.to_csv(index=False, sep=';', encoding='windows-1252')
