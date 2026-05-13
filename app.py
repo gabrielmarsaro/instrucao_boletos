@@ -1,5 +1,5 @@
 import streamlit as st
-import pandas as pdf
+import pandas as pd
 from supabase import create_client, Client
 import unicodedata
 from datetime import datetime
