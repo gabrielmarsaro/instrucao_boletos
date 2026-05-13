@@ -376,6 +376,54 @@ if not st.session_state.user:
                 except: st.error("Erro ao processar.")
 
     st.stop()
+
+# ==========================================
+# MENU LATERAL (SIDEBAR) - SEMPRE VISÍVEL
+# ==========================================
+with st.sidebar:
+    st.image("logo_kore.svg", use_container_width=True)
+    st.markdown("<h3 style='text-align: center; color: #003087;'>Kóre Cash</h3>", unsafe_allow_html=True)
+    st.divider()
+    
+    st.subheader("📥 Planilhas Modelo")
+    st.write("Baixe os arquivos CSV no padrão correto (ANSI) para importação.")
+    
+    # Gerador do Template de Clientes
+    df_template_cli = pd.DataFrame(columns=['cliente', 'cnpj', 'nome', 'endereco', 'bairro', 'cep', 'cidade', 'uf'])
+    csv_template_cli = df_template_cli.to_csv(index=False, sep=';', encoding='windows-1252')
+    st.download_button(
+        label="👥 Baixar Modelo de Clientes",
+        data=csv_template_cli,
+        file_name="modelo_clientes_kore.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+    
+    # Gerador do Template de Boletos
+    df_template_bol = pd.DataFrame(columns=['nosso numero', 'nº documento', 'vencimento líquido', 'total corrigido', 'montante', 'cliente'])
+    csv_template_bol = df_template_bol.to_csv(index=False, sep=';', encoding='windows-1252')
+    st.download_button(
+        label="📄 Baixar Modelo de Boletos",
+        data=csv_template_bol,
+        file_name="modelo_boletos_kore.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+    
+    st.divider()
+    
+    # Bônus: Botão de Sair / Logout
+    if st.button("Sair / Logout", use_container_width=True):
+        st.session_state.user = None
+        st.rerun()
+
+# ==========================================
+# INTERFACE PRINCIPAL (ABAS)
+# ==========================================
+st.title("Gerador de Remessa CNAB 240")
+
+aba_remessa, aba_clientes, aba_convenios = st.tabs([
+# ... (o resto do seu código continua aqui)
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
 # ==========================================
