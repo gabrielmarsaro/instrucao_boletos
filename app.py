@@ -385,16 +385,30 @@ with st.sidebar:
     st.markdown("<h3 style='text-align: center; color: #003087;'>Kóre Cash</h3>", unsafe_allow_html=True)
     st.divider()
     
-    st.subheader("📥 Planilhas Modelo")
+   st.subheader("📥 Planilhas Modelo")
     st.write("Baixe os arquivos CSV no padrão correto (ANSI) para importação.")
     
-    # Gerador do Template de Clientes
+    # Gerador do Template de Clientes (Forçando os bytes para ANSI)
     df_template_cli = pd.DataFrame(columns=['cliente', 'cnpj', 'nome', 'endereco', 'bairro', 'cep', 'cidade', 'uf'])
-    csv_template_cli = df_template_cli.to_csv(index=False, sep=';', encoding='windows-1252')
+    # Transformamos o texto em bytes exatos do windows-1252
+    csv_bytes_cli = df_template_cli.to_csv(index=False, sep=';').encode('windows-1252')
+    
     st.download_button(
         label="👥 Baixar Modelo de Clientes",
-        data=csv_template_cli,
+        data=csv_bytes_cli,
         file_name="modelo_clientes_kore.csv",
+        mime="text/csv",
+        use_container_width=True
+    )
+    
+    # Gerador do Template de Boletos (Forçando os bytes para ANSI)
+    df_template_bol = pd.DataFrame(columns=['nosso numero', 'nº documento', 'vencimento líquido', 'total corrigido', 'montante', 'cliente'])
+    csv_bytes_bol = df_template_bol.to_csv(index=False, sep=';').encode('windows-1252')
+    
+    st.download_button(
+        label="📄 Baixar Modelo de Boletos",
+        data=csv_bytes_bol,
+        file_name="modelo_boletos_kore.csv",
         mime="text/csv",
         use_container_width=True
     )
