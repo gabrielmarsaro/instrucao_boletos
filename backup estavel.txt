@@ -301,7 +301,7 @@ def gerar_trailer_arquivo(total_lotes, total_registros):
 if 'user' not in st.session_state:
     st.session_state.user = None
 
-# Inicializa o estado de erro se ele não existir
+# 1. INICIALIZAÇÃO DO ESTADO (No topo, antes de tudo)
 if 'login_error' not in st.session_state:
     st.session_state.login_error = False
 
@@ -309,12 +309,11 @@ if not st.session_state.user:
     st.write("")
     st.write("")
     st.write("")
-    st.write("")
     
     col_esq, col_login, col_dir = st.columns([1, 1.4, 1])
     
     with col_login:
-        # 1. LOGO E TEXTO
+        # LOGO E TÍTULO
         col_img_esq, col_img_centro, col_img_dir = st.columns([1, 2, 1])
         with col_img_centro:
             st.image("logo_kore.svg", use_container_width=True)
@@ -322,56 +321,60 @@ if not st.session_state.user:
         st.markdown("<p style='text-align: center; color: #555555; font-size: 16px; margin-top: -25px; margin-bottom: 0px;'>Hub de Recebíveis e Integração Financeira</p>", unsafe_allow_html=True)
         st.markdown("<hr style='border: 1.5px solid #F9D616; width: 60%; margin: -5px auto 30px auto;'>", unsafe_allow_html=True)        
         
-        # 2. CAMPOS DE INPUT
-        email = st.text_input("E-mail corporativo", key="login_email")
-        senha = st.text_input("Senha", type="password", key="login_password")
+        # INPUTS
+        email = st.text_input("E-mail corporativo", key="main_email")
+        senha = st.text_input("Senha", type="password", key="main_password")
         
         st.write("") 
-        
-        # 3. BOTÃO PRINCIPAL DE ACESSO
+
+        # BOTÃO DE ACESSO
         if st.button("Acessar Sistema", type="primary", use_container_width=True):
             try:
                 res = supabase.auth.sign_in_with_password({"email": email, "password": senha})
                 st.session_state.user = res.user
-                st.session_state.login_error = False # Reseta o erro se der certo
+                st.session_state.login_error = False
                 st.rerun()
             except Exception as e:
-                # Se der erro, ativamos a exibição do botão de recuperar senha
+                # ATIVA O MODO DE ERRO
                 st.session_state.login_error = True
-                st.error(f"Erro de acesso: Usuário ou senha incorretos.")
-        
+                # O st.rerun() aqui força o Streamlit a ler o código de novo e mostrar o botão
+                st.rerun()
+
+        # ÁREA DINÂMICA DE BOTÕES (REAGE AO ERRO)
         st.write("")
         
-        # 4. LÓGICA CONDICIONAL DOS BOTÕES
         if st.session_state.login_error:
-            # Se errou a senha, mostra Criar Conta e Esqueci a Senha lado a lado
+            # MOSTRA MENSAGEM DE ERRO
+            st.error("Utilizador ou senha incorretos.")
+            
+            # MOSTRA BOTÕES LADO A LADO SE HOUVER ERRO
             c1, c2 = st.columns(2)
             with c1:
-                if st.button("Criar Conta", use_container_width=True):
-                    # ... lógica de criar conta ...
+                if st.button("Criar Conta", use_container_width=True, key="btn_criar_erro"):
                     try:
                         supabase.auth.sign_up({"email": email, "password": senha})
-                        st.success("Verifique seu e-mail para confirmar.")
-                    except: st.error("Erro ao criar conta.")
+                        st.success("Verifique o seu e-mail!")
+                    except: st.error("Erro ao criar.")
             
             with c2:
-                # O botão só aparece aqui, dentro do bloco de erro
-                if st.button("Esqueci a Senha 🔑", use_container_width=True):
+                # O BOTÃO "ESQUECI A SENHA" APARECE AQUI
+                if st.button("Esqueci a Senha 🔑", use_container_width=True, key="btn_forgot"):
                     if not email:
-                        st.warning("Informe seu e-mail para recuperar.")
+                        st.warning("Introduza o seu e-mail acima.")
                     else:
                         try:
                             supabase.auth.reset_password_for_email(email)
-                            st.success("Link enviado para o seu e-mail!")
-                        except: st.error("Erro ao processar recuperação.")
+                            st.success("Link de recuperação enviado!")
+                        except: st.error("Erro ao processar pedido.")
+        
         else:
-            # Se não houve erro (estado inicial), mostra apenas o botão de Criar Conta centralizado
-            if st.button("Criar Conta", use_container_width=True):
+            # SE NÃO HOUVER ERRO, MOSTRA APENAS O CRIAR CONTA (CENTRALIZADO)
+            if st.button("Criar Conta", use_container_width=True, key="btn_criar_normal"):
                 try:
                     supabase.auth.sign_up({"email": email, "password": senha})
-                    st.success("Verifique seu e-mail para confirmar.")
-                except: st.error("Erro ao criar conta.")
-                
+                    st.success("Solicitação enviada para o e-mail.")
+                except: st.error("Erro ao processar.")
+
     st.stop()
 # ==========================================
 # INTERFACE PRINCIPAL (ABAS)
