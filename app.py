@@ -385,7 +385,7 @@ with st.sidebar:
     st.markdown("<h3 style='text-align: center; color: #003087;'>Kóre Cash</h3>", unsafe_allow_html=True)
     st.divider()
     
-   st.subheader("📥 Planilhas Modelo")
+    st.subheader("📥 Planilhas Modelo")
     st.write("Baixe os arquivos CSV no padrão correto (ANSI) para importação.")
     
     # Gerador do Template de Clientes (Forçando os bytes para ANSI)
