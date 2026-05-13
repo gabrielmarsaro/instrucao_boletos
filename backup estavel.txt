@@ -331,16 +331,36 @@ if not st.session_state.user:
                 st.session_state.user = res.user
                 st.rerun()
             except Exception as e:
-                st.error("Credenciais inválidas. Verifique seu e-mail e senha.")
+                # Agora o erro mostra o motivo exato, ajudando a identificar se é falta de confirmação
+                st.error(f"Acesso negado. Verifique a senha ou se já confirmou o e-mail. (Erro: {e})")
         
         st.write("")
         
-        if st.button("Criar Conta", use_container_width=True):
-            try:
-                res = supabase.auth.sign_up({"email": email, "password": senha})
-                st.success("Solicitação registrada! Verifique a caixa de entrada do seu e-mail corporativo.")
-            except Exception as e:
-                st.error(f"Erro ao processar solicitação: {e}")
+        # --- NOVO: Botões secundários divididos em duas colunas ---
+        col_btn1, col_btn2 = st.columns(2)
+        
+        with col_btn1:
+            if st.button("Criar Conta", use_container_width=True):
+                if not email or not senha:
+                    st.warning("Preencha e-mail e senha.")
+                else:
+                    try:
+                        res = supabase.auth.sign_up({"email": email, "password": senha})
+                        st.success("Conta criada! Vá ao seu e-mail e clique no link de confirmação antes de entrar.")
+                    except Exception as e:
+                        st.error(f"Erro ao criar conta: {e}")
+        
+        with col_btn2:
+            if st.button("Esqueci a Senha", use_container_width=True):
+                if not email:
+                    st.warning("Digite seu e-mail acima para recuperar a senha.")
+                else:
+                    try:
+                        # Chama a função nativa do Supabase para enviar o e-mail de reset
+                        supabase.auth.reset_password_for_email(email)
+                        st.success("Link de recuperação enviado! Verifique sua caixa de entrada.")
+                    except Exception as e:
+                        st.error(f"Erro ao solicitar recuperação: {e}")
                 
     st.stop()
 # ==========================================
