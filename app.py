@@ -422,13 +422,6 @@ with st.sidebar:
 # ==========================================
 st.title("Gerador de Remessa CNAB 240")
 
-aba_remessa, aba_clientes, aba_convenios = st.tabs([
-# ... (o resto do seu código continua aqui)
-# ==========================================
-# INTERFACE PRINCIPAL (ABAS)
-# ==========================================
-st.title("Gerador de Remessa CNAB 240")
-
 # Reordenando as abas e nomeando as variáveis de forma explícita
 # A ordem aqui define como aparece na tela da esquerda para a direita
 aba_remessa, aba_clientes, aba_convenios = st.tabs([
